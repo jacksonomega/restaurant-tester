@@ -1,0 +1,1 @@
+.app-container { display: flex; flex-direction: column; height: 100vh; } header { padding: 1rem; background: #333; color: white; text-align: center; } main { flex: 1; padding: 1rem; overflow: hidden; background-color: #f0f2f5; }

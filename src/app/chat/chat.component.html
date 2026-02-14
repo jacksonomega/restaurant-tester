@@ -1,0 +1,54 @@
+<div class="config-panel">
+  <button class="config-toggle" (click)="toggleConfig()">
+    <span>⚙️ Configuración</span>
+    <span>{{ showConfig() ? '▼' : '▶' }}</span>
+  </button>
+  
+  @if (showConfig()) {
+    <div class="url-input-container">
+      <label for="apiUrl">URL del Agente AI:</label>
+      <input 
+        id="apiUrl" 
+        type="text" 
+        [value]="currentApiUrl()" 
+        (input)="updateUrl($event)"
+        placeholder="https://api.example.com/chat"
+      >
+    </div>
+  }
+</div>
+
+<div class="messages-area">
+  @if (messages().length === 0) {
+    <div class="message system">
+      Bienvenido al Chat AI. Configura la URL y comienza a chatear.
+    </div>
+  }
+
+  @for (msg of messages(); track $index) {
+    <div class="message {{ msg.role }}">
+      {{ msg.content }}
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading-indicator">
+      Escribiendo...
+    </div>
+  }
+</div>
+
+<div class="input-area">
+  <input 
+    class="chat-input"
+    type="text" 
+    [value]="currentMessage()"
+    (input)="updateMessage($event)"
+    (keydown.enter)="sendMessage()"
+    placeholder="Escribe un mensaje..."
+    [disabled]="isLoading()"
+  >
+  <button class="send-btn" (click)="sendMessage()" [disabled]="!currentMessage() || isLoading()">
+    Enviar
+  </button>
+</div>
