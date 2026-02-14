@@ -17,6 +17,13 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
+.session-info {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+  font-family: monospace;
+}
+
 .config-toggle {
   background: none;
   border: none;

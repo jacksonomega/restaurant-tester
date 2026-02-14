@@ -1,4 +1,6 @@
 <div class="config-panel">
+  <h3>{{ title() }}</h3>
+  <div class="session-info">Session ID: {{ sessionId() }}</div>
   <button class="config-toggle" (click)="toggleConfig()">
     <span>⚙️ Configuración</span>
     <span>{{ showConfig() ? '▼' : '▶' }}</span>

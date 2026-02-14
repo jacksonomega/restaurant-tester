@@ -1,20 +1,24 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, input } from '@angular/core';
 import { ChatService } from './chat.service';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
   imports: [],
+  providers: [ChatService],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatComponent {
   private readonly chatService = inject(ChatService);
+  
+  readonly title = input.required<string>();
 
   readonly messages = this.chatService.messages;
   readonly isLoading = this.chatService.isLoading;
   readonly currentApiUrl = this.chatService.apiUrl;
+  readonly sessionId = signal(this.chatService.sessionId);
   
   readonly showConfig = signal(false);
   readonly currentMessage = signal('');

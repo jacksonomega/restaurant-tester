@@ -11,12 +11,11 @@ export interface AgentResponse {
   respuesta: string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class ChatService {
   private readonly http = inject(HttpClient);
 
+  readonly sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   readonly messages = signal<ChatMessage[]>([]);
   readonly isLoading = signal(false);
   readonly apiUrl = signal('https://n8n.omega-studio.tech/webhook/7b85964a-278d-49ec-b56f-5d71f9415853'); // Default URL
@@ -31,13 +30,12 @@ export class ChatService {
     this.messages.update(msgs => [...msgs, { role: 'user', content }]);
     this.isLoading.set(true);
 
-    const payload = { input: content }; // Taking a guess on input field, usually 'input' or 'message'
+    const payload = { 
+      mensaje: content,
+      sessionId: this.sessionId
+    };
     
-    // User requested: "la respuesta devuelva por el agente es un json con un campo llamado output"
-    // I will send { message: content } as a common standard, but the prompt didn't specify the REQUEST format, only the RESPONSE.
-    // I'll assume a standard JSON body.
-    
-    this.http.post<AgentResponse>(this.apiUrl(), { message: content })
+    this.http.post<AgentResponse>(this.apiUrl(), payload)
       .pipe(
         map(response => response.respuesta),
         tap(output => {
