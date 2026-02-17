@@ -10,27 +10,12 @@ import { ChatComponent } from './chat/chat.component';
       <header>
         <h1>Restaurant Tester AI Chat</h1>
       </header>
-      <main>
-        <div class="tabs">
-          <button 
-            [class.active]="activeTab() === 'normal'" 
-            (click)="activeTab.set('normal')"
-          >
-            Chat Normal
-          </button>
-          <button 
-            [class.active]="activeTab() === 'admin'" 
-            (click)="activeTab.set('admin')"
-          >
-            Admin Chat
-          </button>
-        </div>
-        
-        <div class="chat-container" [style.display]="activeTab() === 'normal' ? 'block' : 'none'">
+      <main class="split-view">
+        <div class="chat-wrapper">
           <app-chat title="Chat Normal"></app-chat>
         </div>
-        <div class="chat-container" [style.display]="activeTab() === 'admin' ? 'block' : 'none'">
-          <app-chat title="Admin Chat"></app-chat>
+        <div class="chat-wrapper">
+          <app-chat title="Admin Chat" [isAdmin]="true"></app-chat>
         </div>
       </main>
       <router-outlet></router-outlet>
@@ -40,5 +25,4 @@ import { ChatComponent } from './chat/chat.component';
 })
 export class App {
   protected readonly title = signal('restaurant-tester');
-  protected readonly activeTab = signal<'normal' | 'admin'>('normal');
 }

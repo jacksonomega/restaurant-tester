@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, input, effect } from '@angular/core';
 import { ChatService } from './chat.service';
 
 @Component({
@@ -14,6 +14,7 @@ export class ChatComponent {
   private readonly chatService = inject(ChatService);
   
   readonly title = input.required<string>();
+  readonly isAdmin = input(false);
 
   readonly messages = this.chatService.messages;
   readonly isLoading = this.chatService.isLoading;
@@ -22,6 +23,14 @@ export class ChatComponent {
   
   readonly showConfig = signal(false);
   readonly currentMessage = signal('');
+
+  constructor() {
+    effect(() => {
+      if (this.isAdmin()) {
+        this.chatService.enableAdminNotifications();
+      }
+    });
+  }
 
   toggleConfig() {
     this.showConfig.update(v => !v);
