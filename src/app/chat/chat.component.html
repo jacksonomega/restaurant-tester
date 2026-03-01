@@ -1,56 +1,120 @@
-<div class="config-panel">
-  <h3>{{ title() }}</h3>
-  <div class="session-info">Session ID: {{ sessionId() }}</div>
-  <button class="config-toggle" (click)="toggleConfig()">
-    <span>⚙️ Configuración</span>
-    <span>{{ showConfig() ? '▼' : '▶' }}</span>
-  </button>
-  
-  @if (showConfig()) {
-    <div class="url-input-container">
-      <label for="apiUrl">URL del Agente AI:</label>
-      <input 
-        id="apiUrl" 
-        type="text" 
-        [value]="currentApiUrl()" 
-        (input)="updateUrl($event)"
-        placeholder="https://api.example.com/chat"
-      >
-    </div>
-  }
-</div>
+<div class="chat-layout">
+  <!-- Sidebar 1: Mode Switcher -->
+  <aside class="sidebar-mode">
+    <div class="logo">💬</div>
+    <button 
+      class="mode-btn" 
+      [class.active]="currentMode() === 'client'"
+      (click)="chatService.switchMode('client')"
+      title="Client Chat">
+      <span class="icon">👤</span>
+      <span class="mode-label">Cliente</span>
+    </button>
+    <button 
+      class="mode-btn" 
+      [class.active]="currentMode() === 'admin'"
+      (click)="chatService.switchMode('admin')"
+      title="Admin Chat">
+      <span class="icon">🛡️</span>
+      <span class="mode-label">Admin</span>
+    </button>
+  </aside>
 
-<div class="messages-area">
-  @if (messages().length === 0) {
-    <div class="message system">
-      Bienvenido al Chat AI. Configura la URL y comienza a chatear.
+  <!-- Sidebar 2: History -->
+  <aside class="sidebar-history">
+    <div class="history-header">
+      <h3>Historial</h3>
+      <button class="new-chat-btn" (click)="createNewChat()">
+        <span>+</span> Nuevo Chat
+      </button>
     </div>
-  }
-
-  @for (msg of messages(); track $index) {
-    <div class="message {{ msg.role }}">
-      {{ msg.content }}
+    
+    <div class="history-list">
+      @for (chat of historyByMode(); track chat.id) {
+        <div 
+          class="history-item" 
+          [class.active]="chat.id === currentChatId()"
+          (click)="chatService.selectChat(chat.id)">
+          <div class="history-item-content">
+            <span class="chat-title">{{ chat.title }}</span>
+            <span class="chat-date">{{ chat.updatedAt | date:'short' }}</span>
+          </div>
+          <button class="delete-btn" (click)="chatService.deleteChat(chat.id, $event)" title="Borrar">×</button>
+        </div>
+      } @empty {
+        <div class="empty-history">No hay conversaciones previas</div>
+      }
     </div>
-  }
+  </aside>
 
-  @if (isLoading()) {
-    <div class="loading-indicator">
-      Escribiendo...
-    </div>
-  }
-</div>
+  <!-- Main Chat Area -->
+  <main class="chat-main">
+    @if (currentChatId()) {
+      <div class="chat-header">
+        <h2>{{ currentChat()?.title }}</h2>
+        <div class="header-controls">
+          @if (currentMode() === 'client') {
+            <button class="human-toggle-btn" 
+              [class.active]="isHumanChat()"
+              (click)="chatService.toggleHumanChat()"
+              title="Cambiar entre IA y Persona">
+              {{ isHumanChat() ? '🗣️ Humano' : '🤖 IA' }}
+            </button>
+          }
+          <span class="status-badge">{{ currentMode() }}</span>
+        </div>
+      </div>
 
-<div class="input-area">
-  <input 
-    class="chat-input"
-    type="text" 
-    [value]="currentMessage()"
-    (input)="updateMessage($event)"
-    (keydown.enter)="sendMessage()"
-    placeholder="Escribe un mensaje..."
-    [disabled]="isLoading()"
-  >
-  <button class="send-btn" (click)="sendMessage()" [disabled]="!currentMessage() || isLoading()">
-    Enviar
-  </button>
+      <div class="messages-area">
+        @if (messages().length === 0) {
+          <div class="message system">
+            <p>👋 ¡Hola! Soy tu asistente virtual.</p>
+            <p>Estoy aquí para ayudarte, pero si prefieres hablar directamente con un agente humano, puedes activar el interruptor "🤖 IA / 🗣️ Humano" en la parte superior derecha.</p>
+          </div>
+        }
+
+        @for (msg of messages(); track $index) {
+          <div class="message-wrapper" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'" [class.system]="msg.role === 'system'">
+            <div class="avatar">
+              {{ msg.role === 'user' ? '👤' : (msg.role === 'assistant' ? '🤖' : '⚠️') }}
+            </div>
+            <div class="message-content">
+              {{ msg.content }}
+            </div>
+          </div>
+        }
+
+        @if (isLoading()) {
+          <div class="message-wrapper assistant loading">
+            <div class="avatar">🤖</div>
+            <div class="message-content">
+              <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="input-area">
+        <input 
+          class="chat-input"
+          type="text" 
+          [value]="currentMessage()"
+          (input)="updateMessage($event)"
+          (keydown.enter)="sendMessage()"
+          placeholder="Escribe un mensaje..."
+          [disabled]="isLoading()"
+        >
+        <button class="send-btn" (click)="sendMessage()" [disabled]="!currentMessage() || isLoading()">
+          ➤
+        </button>
+      </div>
+    } @else {
+      <div class="welcome-screen">
+        <div class="welcome-icon">👋</div>
+        <h2>Bienvenido</h2>
+        <p>Selecciona una conversación del historial o crea una nueva.</p>
+        <button class="primary-btn" (click)="createNewChat()">Comenzar Chat</button>
+      </div>
+    }
+  </main>
 </div>

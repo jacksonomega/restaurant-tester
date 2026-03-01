@@ -1,45 +1,28 @@
-import { Component, ChangeDetectionStrategy, inject, signal, input, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, effect } from '@angular/core';
+import { CommonModule } from '@angular/common'; // Important for NgClass, DatePipe if used
 import { ChatService } from './chat.service';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [],
-  providers: [ChatService],
+  imports: [CommonModule],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatComponent {
-  private readonly chatService = inject(ChatService);
+  readonly chatService = inject(ChatService);
   
-  readonly title = input.required<string>();
-  readonly isAdmin = input(false);
-
+  // Expose signals for template
+  readonly currentMode = this.chatService.currentMode;
+  readonly isHumanChat = this.chatService.isHumanChat;
+  readonly historyByMode = this.chatService.historyByMode;
+  readonly currentChat = this.chatService.currentChat;
   readonly messages = this.chatService.messages;
   readonly isLoading = this.chatService.isLoading;
-  readonly currentApiUrl = this.chatService.apiUrl;
-  readonly sessionId = signal(this.chatService.sessionId);
+  readonly currentChatId = this.chatService.currentChatId;
   
-  readonly showConfig = signal(false);
   readonly currentMessage = signal('');
-
-  constructor() {
-    effect(() => {
-      if (this.isAdmin()) {
-        this.chatService.enableAdminNotifications();
-      }
-    });
-  }
-
-  toggleConfig() {
-    this.showConfig.update(v => !v);
-  }
-
-  updateUrl(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.chatService.updateApiUrl(input.value);
-  }
 
   updateMessage(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -47,10 +30,14 @@ export class ChatComponent {
   }
 
   sendMessage() {
-    const msg = this.currentMessage();
-    if (msg.trim()) {
-      this.chatService.sendMessage(msg);
-      this.currentMessage.set('');
-    }
+    const content = this.currentMessage();
+    if (!content.trim()) return;
+    
+    this.chatService.sendMessage(content);
+    this.currentMessage.set('');
+  }
+  
+  createNewChat() {
+    this.chatService.createNewChat();
   }
 }
